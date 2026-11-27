@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Sticky Notes & Chat — User & Admin Portal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <div class="header-brand">
+        <h1 id="appTitle">📌 Interactive Group Sticky Notes</h1>
+        <p id="headerSubtitle">Please log in to view and post on the board</p>
+      </div>
+
+      <!-- Mobile Hamburger Toggle (Hidden on Desktop) -->
+      <button
+        type="button"
+        id="mobileMenuToggle"
+        class="mobile-menu-toggle"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+      >
+        ☰ Menu
+      </button>
+
+      <!-- Collapsible Nav Actions -->
+      <nav id="headerNavMenu" class="header-nav-menu">
+        <!-- Notification Bell Button (Visible when logged in) -->
+        <button
+          type="button"
+          id="openNotificationsBtn"
+          class="settings-trigger notif-trigger hidden"
+          aria-label="Open notifications"
+        >
+          🔔 <span id="notifBtnLabel">Notifications</span>
+          <span id="notifBadge" class="notif-badge hidden">0</span>
+        </button>
+
+        <button type="button" id="openSettingsBtn" class="settings-trigger">
+          ⚙️ <span id="settingsBtnLabel">Settings</span>
+        </button>
+        <button type="button" id="mobileLogoutBtn" class="logout-btn mobile-only-logout hidden">
+          Log Out
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- NOTIFICATIONS MODAL / DRAWER -->
+  <div id="notificationsModal" class="modal-backdrop hidden">
+    <div class="modal-card notif-modal-card">
+      <div class="modal-header">
+        <h2>🔔 Activity Notifications</h2>
+        <button type="button" id="closeNotificationsBtn" class="close-btn" aria-label="Close notifications">✕</button>
+      </div>
+      <div class="notif-toolbar">
+        <button type="button" id="enableBrowserNotifBtn" class="secondary-btn small-btn">
+          Enable Desktop/Mobile Alerts
+        </button>
+        <button type="button" id="markAllReadBtn" class="secondary-btn small-btn">
+          Mark All Read
+        </button>
+        <button type="button" id="clearNotifsBtn" class="secondary-btn small-btn">
+          Clear
+        </button>
+      </div>
+      <div id="notificationsList" class="notifications-list">
+        <p class="empty-state">No notifications yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEVICE CAMERA MODAL -->
+  <div id="cameraModal" class="modal-backdrop hidden">
+    <div class="modal-card camera-modal-card">
+      <div class="modal-header">
+        <h2>📷 Capture Photo</h2>
+        <button type="button" id="closeCameraBtn" class="close-btn" aria-label="Close camera">✕</button>
+      </div>
+      <div class="camera-viewport">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <canvas id="cameraCanvas" class="hidden"></canvas>
+        <img id="cameraPreviewImg" class="hidden" alt="Captured preview" />
+      </div>
+      <p id="cameraStatusMsg" class="setting-hint">Point your camera and click Capture.</p>
+      <div class="modal-actions camera-actions">
+        <button type="button" id="switchCameraBtn" class="secondary-btn">🔄 Flip Camera</button>
+        <button type="button" id="capturePhotoBtn">📸 Capture</button>
+        <button type="button" id="retakePhotoBtn" class="secondary-btn hidden">↩ Retake</button>
+        <button type="button" id="usePhotoBtn" class="hidden">✅ Attach Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL (Available on Front Page & Inside App) -->
+  <div id="settingsModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="settingsHeading">⚙️ System Settings</h2>
+        <button type="button" id="closeSettingsBtn" class="close-btn" aria-label="Close settings">✕</button>
+      </div>
+
+      <!-- Avatar Picker (User & Admin) -->
+      <div class="setting-group">
+        <label id="labelAvatar">Profile Avatar</label>
+        <div class="avatar-picker-row" id="avatarPicker">
+          <button type="button" class="avatar-btn active" data-avatar="😎">😎</button>
+          <button type="button" class="avatar-btn" data-avatar="🦊">🦊</button>
+          <button type="button" class="avatar-btn" data-avatar="🐱">🐱</button>
+          <button type="button" class="avatar-btn" data-avatar="🤖">🤖</button>
+          <button type="button" class="avatar-btn" data-avatar="🌟">🌟</button>
+          <button type="button" class="avatar-btn" data-avatar="🎨">🎨</button>
+          <button type="button" class="avatar-btn" data-avatar="🛡️">🛡️</button>
+          <button type="button" class="avatar-btn" data-avatar="🚀">🚀</button>
+        </div>
+      </div>
+
+      <!-- Change Personal Password (When Signed In with Email/Password) -->
+      <div class="setting-group password-box hidden" id="passwordChangeSection">
+        <label id="labelChangePassword">Change Personal Password</label>
+        <p id="passwordHint" class="setting-hint">
+          Enter your current password and a new password (min. 6 characters).
+        </p>
+        <div class="password-fields">
+          <div class="password-input-wrap">
+            <input type="password" id="currentPasswordInput" placeholder="Current password" />
+            <button
+              type="button"
+              class="toggle-password-btn"
+              data-target="currentPasswordInput"
+              aria-label="Show or hide current password"
+              title="Show / Hide Password"
+            >
+              👁️
+            </button>
+          </div>
+          <div class="password-input-wrap">
+            <input type="password" id="newPasswordInput" placeholder="New password (min. 6 chars)" minlength="6" />
+            <button
+              type="button"
+              class="toggle-password-btn"
+              data-target="newPasswordInput"
+              aria-label="Show or hide new password"
+              title="Show / Hide Password"
+            >
+              👁️
+            </button>
+          </div>
+          <button type="button" id="updatePasswordBtn" class="secondary-btn">Update Password</button>
+        </div>
+        <p id="passwordStatusMsg" class="setting-status"></p>
+      </div>
+
+      <div class="setting-group">
+        <label for="themeModeSelect" id="labelThemeMode">Appearance Mode</label>
+        <select id="themeModeSelect">
+          <option value="light">Light Mode</option>
+          <option value="dark">Dark Mode</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label id="labelAccentColor">Accent &amp; Interface Theme</label>
+        <div class="color-swatch-row" id="accentSwatches">
+          <button type="button" class="swatch-btn active" data-accent="blue" title="Ocean Blue">Blue</button>
+          <button type="button" class="swatch-btn" data-accent="green" title="Neon Mint">Green</button>
+          <button type="button" class="swatch-btn" data-accent="pink" title="Rose Pink">Pink</button>
+          <button type="button" class="swatch-btn" data-accent="amber" title="Warm Gold">Gold</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label for="languageSelect" id="labelLanguage">Language</label>
+        <select id="languageSelect">
+          <option value="en">English</option>
+          <option value="tl">Tagalog</option>
+          <option value="hil">Hiligaynon</option>
+          <option value="ceb">Bisaya</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label for="gridSizeSelect" id="labelGridSize">Board Card Size</label>
+        <select id="gridSizeSelect">
+          <option value="normal">Normal Cards</option>
+          <option value="compact">Compact Cards</option>
+          <option value="large">Large Cards</option>
+        </select>
+      </div>
+
+      <div class="setting-group checkbox-row">
+        <input type="checkbox" id="stickerAnimToggle" checked />
+        <label for="stickerAnimToggle" id="labelStickerAnim">Enable interactive sticker bounce on hover</label>
+      </div>
+
+      <div class="setting-group checkbox-row">
+        <input type="checkbox" id="notifySoundToggle" checked />
+        <label for="notifySoundToggle" id="labelNotifySound">Play speaker sound on new notes &amp; messages</label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="resetSettingsBtn" class="secondary-btn">Reset Defaults</button>
+        <button type="button" id="saveSettingsBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Notification Toast -->
+  <div id="noteToast" class="note-toast hidden" role="status" aria-live="polite">
+    <span id="noteToastText">🔔 New notification!</span>
+    <button type="button" id="closeToastBtn" class="toast-close-btn" aria-label="Dismiss notification">✕</button>
+  </div>
+
+  <main class="container">
+    <!-- AUTHENTICATION PANEL -->
+    <section id="authSection" class="auth-card">
+      <div class="role-selector" id="roleSelector">
+        <button type="button" id="userRoleBtn" class="role-btn active">👤 User Login</button>
+        <button type="button" id="adminRoleBtn" class="role-btn">🛡️ Admin Login</button>
+      </div>
+
+      <div class="auth-tabs" id="authTabs">
+        <button type="button" id="showLoginTab" class="tab-btn active">Log In</button>
+        <button type="button" id="showSignupTab" class="tab-btn">Create User Account</button>
+      </div>
+
+      <p id="adminNotice" class="admin-notice hidden">
+        Admin accounts cannot be created here. Sign in with your Admin email and password after your role is set to "admin" in Firestore.
+      </p>
+
+      <form id="authForm">
+        <input type="text" id="nameInput" placeholder="Full Name (New User Only)" class="hidden" />
+        <input
+          type="text"
+          id="signupUsernameInput"
+          placeholder="Nickname / Username (letters, numbers, _, 3-20 chars)"
+          pattern="^[a-zA-Z0-9_]{3,20}$"
+          class="hidden"
+        />
+
+        <input type="text" id="loginIdentifierInput" placeholder="Email or Nickname" required />
+        <input type="email" id="signupEmailInput" placeholder="Email address (e.g., name@gmail.com)" class="hidden" />
+
+        <div class="password-input-wrap">
+          <input type="password" id="passwordInput" placeholder="Password (min. 6 chars)" minlength="6" required />
+          <button
+            type="button"
+            class="toggle-password-btn"
+            data-target="passwordInput"
+            aria-label="Show or hide password"
+            title="Show / Hide Password"
+          >
+            👁️
+          </button>
+        </div>
+
+        <div class="form-helper-row" id="forgotPasswordRow">
+          <button type="button" id="forgotPasswordBtn" class="link-btn">Forgot password?</button>
+        </div>
+
+        <button type="submit" id="authSubmitBtn">Log In as User</button>
+      </form>
+
+      <div id="resetPasswordBox" class="reset-box hidden">
+        <h3 id="resetHeading">Reset Password via Gmail / Email</h3>
+        <p id="resetDesc">Enter your Gmail/email address (or nickname) and we will send a password reset link.</p>
+        <div class="reset-inline">
+          <input type="text" id="resetEmailInput" placeholder="Enter Gmail, email, or nickname" />
+          <button type="button" id="sendResetBtn">Send Link</button>
+        </div>
+        <button type="button" id="cancelResetBtn" class="link-btn">Back to Login</button>
+      </div>
+
+      <div id="socialAuthBlock">
+        <div class="divider"><span id="orContinueLabel">or continue as User with</span></div>
+        <div class="provider-buttons">
+          <button type="button" id="googleBtn" class="provider-btn google">Gmail (Google)</button>
+        </div>
+      </div>
+
+      <p id="authMessage" class="auth-message"></p>
+    </section>
+
+    <!-- MAIN APPLICATION (Only shown AFTER successful login) -->
+    <section id="appSection" class="hidden">
+      <div class="user-bar">
+        <div class="user-details">
+          <span id="userAvatarBadge" class="user-avatar-badge">😎</span>
+          <span id="roleBadge" class="badge badge-user">USER</span>
+          <span>
+            <span id="signedInAsLabel">Signed in as</span> <strong id="userDisplayName"></strong>
+            <span id="userHandleWrap">(@<span id="userHandle"></span>)</span>
+            — <span id="userEmail"></span>
+          </span>
+        </div>
+        <button type="button" id="logoutBtn" class="logout-btn desktop-logout-btn">Log Out</button>
+      </div>
+
+      <!-- WORKSPACE VIEW TABS (Sticky Board vs. User & Admin Messaging) -->
+      <div class="workspace-tabs">
+        <button type="button" id="tabBoardBtn" class="workspace-tab active">📌 Sticky Notes Board</button>
+        <button type="button" id="tabChatBtn" class="workspace-tab">
+          💬 User &amp; Admin Chat <span id="chatUnreadPill" class="chat-pill hidden">0</span>
+        </button>
+      </div>
+
+      <!-- ==================== VIEW 1: STICKY NOTES BOARD ==================== -->
+      <div id="boardViewSection">
+        <section class="note-creator">
+          <h2 id="creatorHeading">Create Interactive Sticky Note</h2>
+          <form id="noteForm">
+            <textarea id="contentInput" rows="3" placeholder="Type your message here..." required></textarea>
+
+            <div class="sticker-picker-group">
+              <label id="chooseStickerLabel">Choose a Sticker:</label>
+              <div class="sticker-options" id="stickerOptions"></div>
+            </div>
+
+            <!-- Custom Sticker Adder -->
+            <div class="custom-sticker-builder">
+              <label for="customStickerInput" id="customStickerLabel">Add Custom Sticker (Emoji or Image URL):</label>
+              <div class="custom-sticker-row">
+                <input
+                  type="text"
+                  id="customStickerInput"
+                  placeholder="Paste emoji (e.g. 🦄) or image URL (https://...)"
+                />
+                <button type="button" id="addCustomStickerBtn" class="secondary-btn">Add Sticker</button>
+              </div>
+            </div>
+
+            <!-- Expanded Sticky Note Color Palette + Manual Color Picker -->
+            <div class="note-color-picker-section">
+              <label id="colorLabel">Sticky Note Color (Presets or Manual Custom Color):</label>
+              <div class="note-color-swatches" id="noteColorSwatches">
+                <button type="button" class="note-swatch active" data-color="#fff740" style="background:#fff740;" title="Classic Yellow"></button>
+                <button type="button" class="note-swatch" data-color="#ff7eb9" style="background:#ff7eb9;" title="Neon Pink"></button>
+                <button type="button" class="note-swatch" data-color="#7afcff" style="background:#7afcff;" title="Sky Blue"></button>
+                <button type="button" class="note-swatch" data-color="#98ff98" style="background:#98ff98;" title="Mint Green"></button>
+                <button type="button" class="note-swatch" data-color="#ffd166" style="background:#ffd166;" title="Warm Amber"></button>
+                <button type="button" class="note-swatch" data-color="#e0bbff" style="background:#e0bbff;" title="Soft Lavender"></button>
+                <button type="button" class="note-swatch" data-color="#ffadad" style="background:#ffadad;" title="Coral Peach"></button>
+                <button type="button" class="note-swatch" data-color="#cdb4db" style="background:#cdb4db;" title="Lilac Mist"></button>
+                <button type="button" class="note-swatch" data-color="#fefae0" style="background:#fefae0;" title="Cream Ivory"></button>
+                <button type="button" class="note-swatch" data-color="#80ffdb" style="background:#80ffdb;" title="Electric Teal"></button>
+                <button type="button" class="note-swatch" data-color="#ffc6ff" style="background:#ffc6ff;" title="Sunset Rose"></button>
+                <button type="button" class="note-swatch" data-color="#d9ed92" style="background:#d9ed92;" title="Lime Zest"></button>
+              </div>
+
+              <div class="manual-color-row">
+                <label for="customNoteColorInput" class="manual-color-label">🎨 Custom Color:</label>
+                <input type="color" id="customNoteColorInput" value="#fff740" aria-label="Choose custom sticky note color" />
+                <span id="selectedColorHex" class="color-hex-badge">#FFF740</span>
+                <input type="hidden" id="colorSelect" value="#fff740" />
+              </div>
+            </div>
+
+            <div class="controls">
+              <div class="control-item">
+                <label for="tiltSelect" id="tiltLabel">Tilt:</label>
+                <select id="tiltSelect">
+                  <option value="0deg">Straight (0°)</option>
+                  <option value="-2deg">Left (-2°)</option>
+                  <option value="2deg">Right (+2°)</option>
+                </select>
+              </div>
+
+              <button type="submit" id="submitBtn">Stick to Board</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Interactive Filter Bar -->
+        <div class="board-toolbar">
+          <input type="text" id="searchInput" placeholder="Search sticky notes or @nicknames..." />
+          <select id="filterOwnership">
+            <option value="all">All Sticky Notes</option>
+            <option value="mine">My Sticky Notes Only</option>
+          </select>
+        </div>
+
+        <!-- Sticky Notes Board -->
+        <section id="notesBoard" class="notes-grid"></section>
+      </div>
+
+      <!-- ==================== VIEW 2: USER & ADMIN MESSAGING HUB ==================== -->
+      <div id="chatViewSection" class="hidden">
+        <section class="chat-container">
+          <div class="chat-header-bar">
+            <div>
+              <h2>💬 User &amp; Admin Community Chat</h2>
+              <p class="setting-hint">Message anyone, reply to messages, share files/images, or snap a live camera photo.</p>
+            </div>
+            <div class="chat-filter-wrap">
+              <select id="chatChannelFilter" aria-label="Filter messages">
+                <option value="all">All Messages</option>
+                <option value="admin">Admin Messages</option>
+                <option value="user">User Messages</option>
+                <option value="media">Images &amp; Files Only</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Messages Feed -->
+          <div id="chatMessagesFeed" class="chat-messages-feed">
+            <p class="empty-state">Loading messages...</p>
+          </div>
+
+          <!-- Active Reply Banner -->
+          <div id="replyPreviewBanner" class="reply-banner hidden">
+            <div class="reply-banner-content">
+              <span class="reply-banner-label">↩ Replying to <strong id="replyTargetAuthor">@user</strong>:</span>
+              <span id="replyTargetText" class="reply-banner-snippet"></span>
+            </div>
+            <button type="button" id="cancelReplyBtn" class="close-btn small-btn" aria-label="Cancel reply">✕</button>
+          </div>
+
+          <!-- Pending Attachment Preview (Image / Camera / File) -->
+          <div id="attachmentPreviewBanner" class="attachment-banner hidden">
+            <div class="attachment-banner-info">
+              <img id="attachmentImageThumb" class="attachment-thumb hidden" alt="Attachment preview" />
+              <div>
+                <strong id="attachmentFileName">file.png</strong>
+                <span id="attachmentFileMeta" class="setting-hint">Ready to upload</span>
+              </div>
+            </div>
+            <button type="button" id="removeAttachmentBtn" class="close-btn small-btn" aria-label="Remove attachment">✕</button>
+          </div>
+
+          <!-- Chat Composer -->
+          <form id="chatForm" class="chat-composer">
+            <div class="chat-media-buttons">
+              <button type="button" id="openCameraBtn" class="secondary-btn media-btn" title="Open Device Camera">
+                📷 Camera
+              </button>
+              <button type="button" id="pickImageBtn" class="secondary-btn media-btn" title="Upload Image">
+                🖼️ Image
+              </button>
+              <button type="button" id="pickFileBtn" class="secondary-btn media-btn" title="Upload File">
+                📎 File
+              </button>
+              <input type="file" id="imageFileInput" accept="image/*" class="hidden" />
+              <input type="file" id="generalFileInput" class="hidden" />
+            </div>
+
+            <div class="chat-input-row">
+              <input
+                type="text"
+                id="chatMessageInput"
+                placeholder="Write a message to users or admins (use @nickname to mention)..."
+                autocomplete="off"
+              />
+              <button type="submit" id="sendChatBtn">Send ➤</button>
+            </div>
+            <p id="uploadProgressMsg" class="setting-hint hidden"></p>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
